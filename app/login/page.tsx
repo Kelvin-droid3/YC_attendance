@@ -1,0 +1,44 @@
+'use client'
+
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { supabase } from '@/lib/supabase'
+
+export default function LoginPage() {
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
+  const router = useRouter()
+
+  async function handleLogin(e: React.FormEvent) {
+    e.preventDefault()
+    setLoading(true)
+    setError('')
+
+    const { error: signInError } = await supabase.auth.signInWithPassword({ email, password })
+    setLoading(false)
+
+    if (signInError) {
+      setError(signInError.message)
+      return
+    }
+
+    router.push('/admin')
+  }
+
+  return (
+    <main>
+      <section className="card" style={{ maxWidth: 480, margin: '0 auto' }}>
+        <h1>Login</h1>
+        <p>Use your Supabase Auth credentials.</p>
+        <form onSubmit={handleLogin} className="grid">
+          <label>Email<input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required /></label>
+          <label>Password<input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required /></label>
+          <button className="primary" type="submit" disabled={loading}>{loading ? 'Signing in...' : 'Sign In'}</button>
+          {error && <p style={{ color: '#dc2626' }}>{error}</p>}
+        </form>
+      </section>
+    </main>
+  )
+}
