@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import QRCodeCard from '@/components/QRCodeCard'
-import { demoMode, getDemoAttendance, getDemoUser } from '@/lib/demo'
 
 type AttendanceRow = {
   id: string
@@ -16,13 +15,6 @@ export default function AdminPage() {
   const [meId, setMeId] = useState('')
 
   useEffect(() => {
-    if (demoMode) {
-      const demoUser = getDemoUser()
-      if (demoUser?.id) setMeId(demoUser.id)
-      setRows(getDemoAttendance())
-      return
-    }
-
     supabase.auth.getUser().then(({ data }) => {
       if (data.user?.id) setMeId(data.user.id)
     })
@@ -44,7 +36,6 @@ export default function AdminPage() {
       <section className="card">
         <h1>Admin Dashboard</h1>
         <p>Total recent check-ins: <strong>{rows.length}</strong></p>
-        {demoMode && <p style={{ color: '#2563eb' }}>Demo mode is enabled (local browser storage).</p>}
         <p>Today&apos;s check-ins: <strong>{todayCount}</strong></p>
       </section>
 

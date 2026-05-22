@@ -13,17 +13,9 @@ Modern attendance web app with:
    ```
 2. Configure environment variables:
    ```bash
-   # macOS/Linux
    cp .env.example .env.local
-
-   # Windows PowerShell
-   Copy-Item .env.example .env.local
    ```
-3. (Optional) Enable local demo mode (no Supabase required):
-   ```env
-   NEXT_PUBLIC_DEMO_MODE=true
-   ```
-4. Run development server:
+3. Run development server:
    ```bash
    npm run dev
    ```
@@ -45,14 +37,6 @@ create table attendance_records (
   source text default 'qr'
 );
 ```
-
-## Demo mode
-
-When `NEXT_PUBLIC_DEMO_MODE=true`:
-- Login accepts any email/password
-- Check-ins are saved in browser localStorage
-- Admin dashboard reads local demo records
-- Supabase behavior is unchanged when demo mode is false
 
 ## Routes
 

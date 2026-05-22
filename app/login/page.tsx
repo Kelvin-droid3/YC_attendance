@@ -3,7 +3,6 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
-import { demoMode, setDemoUser } from '@/lib/demo'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -16,13 +15,6 @@ export default function LoginPage() {
     e.preventDefault()
     setLoading(true)
     setError('')
-
-    if (demoMode) {
-      setDemoUser(email)
-      setLoading(false)
-      router.push('/admin')
-      return
-    }
 
     const { error: signInError } = await supabase.auth.signInWithPassword({ email, password })
     setLoading(false)
@@ -39,7 +31,7 @@ export default function LoginPage() {
     <main>
       <section className="card" style={{ maxWidth: 480, margin: '0 auto' }}>
         <h1>Login</h1>
-        <p>{demoMode ? 'Demo mode: enter any email/password to preview UI.' : 'Use your Supabase Auth credentials.'}</p>
+        <p>Use your Supabase Auth credentials.</p>
         <form onSubmit={handleLogin} className="grid">
           <label>Email<input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required /></label>
           <label>Password<input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required /></label>

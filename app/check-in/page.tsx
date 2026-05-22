@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import { addDemoAttendance, demoMode } from '@/lib/demo'
 
 export default function CheckInPage() {
   const [token, setToken] = useState('')
@@ -10,12 +9,6 @@ export default function CheckInPage() {
   async function submitCheckin(e: React.FormEvent) {
     e.preventDefault()
     setResult('Submitting...')
-
-    if (demoMode) {
-      addDemoAttendance(token)
-      setResult('✅ Demo check-in recorded locally')
-      return
-    }
 
     const response = await fetch('/api/check-in', {
       method: 'POST',
