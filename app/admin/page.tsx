@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import QRCodeCard from '@/components/QRCodeCard'
-import { clearDemoData, demoMode, getDemoAttendance, getDemoUser, seedDemoData } from '@/lib/demo'
 
 type AttendanceRow = {
   id: string
@@ -11,38 +10,11 @@ type AttendanceRow = {
   attendees: { email: string; full_name: string }
 }
 
-type SupabaseAttendanceRow = {
-  id: string
-  checked_in_at: string
-  attendees: { email: string; full_name: string } | { email: string; full_name: string }[] | null
-}
-
-function normalizeAttendanceRows(data: SupabaseAttendanceRow[] | null): AttendanceRow[] {
-  return (data ?? []).map((row) => ({
-    id: row.id,
-    checked_in_at: row.checked_in_at,
-    attendees: Array.isArray(row.attendees)
-      ? row.attendees[0] ?? { email: '-', full_name: 'Unknown' }
-      : row.attendees ?? { email: '-', full_name: 'Unknown' }
-  }))
-}
-
 export default function AdminPage() {
   const [rows, setRows] = useState<AttendanceRow[]>([])
   const [meId, setMeId] = useState('')
 
-  function loadDemoRows() {
-    const demoUser = getDemoUser()
-    if (demoUser?.id) setMeId(demoUser.id)
-    setRows(getDemoAttendance())
-  }
-
   useEffect(() => {
-    if (demoMode) {
-      loadDemoRows()
-      return
-    }
-
     supabase.auth.getUser().then(({ data }) => {
       if (data.user?.id) setMeId(data.user.id)
     })
@@ -53,74 +25,34 @@ export default function AdminPage() {
       .order('checked_in_at', { ascending: false })
       .limit(50)
       .then(({ data }) => {
-        setRows(normalizeAttendanceRows(data as SupabaseAttendanceRow[] | null))
+        setRows((data as AttendanceRow[]) ?? [])
       })
   }, [])
 
-  function handleSeedDemoData() {
-    const records = seedDemoData()
-    const demoUser = getDemoUser()
-    if (demoUser?.id) setMeId(demoUser.id)
-    setRows(records)
-  }
-
-  function handleClearDemoData() {
-    clearDemoData()
-    setMeId('')
-    setRows([])
-  }
-
   const todayCount = useMemo(() => rows.filter((r) => new Date(r.checked_in_at).toDateString() === new Date().toDateString()).length, [rows])
-  const latestCheckIn = rows[0] ? new Date(rows[0].checked_in_at).toLocaleTimeString() : 'No check-ins yet'
 
   return (
     <main className="grid">
       <section className="card">
-        <p style={{ color: 'var(--primary)', fontWeight: 800 }}>Admin dashboard</p>
-        <h1>Attendance overview</h1>
-        {demoMode && <p style={{ color: 'var(--primary)' }}>Demo mode is enabled. Records are stored in this browser only.</p>}
-        {demoMode && (
-          <div className="hero-actions" style={{ marginBottom: '1rem' }}>
-            <button className="primary" type="button" onClick={handleSeedDemoData}>Load sample youth data</button>
-            <button className="secondary" type="button" onClick={handleClearDemoData}>Clear demo data</button>
-          </div>
-        )}
-        <div className="stat-grid">
-          <div className="stat">
-            <span>Total check-ins</span>
-            <strong>{rows.length}</strong>
-          </div>
-          <div className="stat">
-            <span>Today</span>
-            <strong>{todayCount}</strong>
-          </div>
-          <div className="stat">
-            <span>Latest</span>
-            <strong style={{ fontSize: '1rem' }}>{latestCheckIn}</strong>
-          </div>
-        </div>
+        <h1>Admin Dashboard</h1>
+        <p>Total recent check-ins: <strong>{rows.length}</strong></p>
+        <p>Today&apos;s check-ins: <strong>{todayCount}</strong></p>
       </section>
 
       {meId && <QRCodeCard payload={meId} />}
 
       <section className="card">
-        <h2>People who checked in</h2>
-        <p>Admins can see each person&apos;s full name and the time they signed in.</p>
+        <h2>Recent Attendance Records</h2>
         <div style={{ overflowX: 'auto' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
               <tr>
-                <th style={{ textAlign: 'left' }}>Full name</th>
+                <th style={{ textAlign: 'left' }}>Name</th>
                 <th style={{ textAlign: 'left' }}>Email</th>
-                <th style={{ textAlign: 'left' }}>Signed in at</th>
+                <th style={{ textAlign: 'left' }}>Checked in at</th>
               </tr>
             </thead>
             <tbody>
-              {rows.length === 0 && (
-                <tr>
-                  <td colSpan={3}>No one has checked in yet. In demo mode, click “Load sample youth data” to test the dashboard.</td>
-                </tr>
-              )}
               {rows.map((row) => (
                 <tr key={row.id}>
                   <td>{row.attendees?.full_name ?? 'Unknown'}</td>
