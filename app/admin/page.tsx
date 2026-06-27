@@ -26,7 +26,7 @@ export default function AdminPage() {
       .limit(50)
       .then(({ data }) => {
         // normalize possible null and ensure attendees is an array or null
-        const normalized = (data ?? []).map((r: any) => ({
+        const normalized = (data ?? []).map((r: AttendanceRow) => ({
           id: r.id,
           checked_in_at: r.checked_in_at ?? null,
           attendees: Array.isArray(r.attendees) ? r.attendees : r.attendees ? [r.attendees] : null,
@@ -46,7 +46,7 @@ export default function AdminPage() {
       <section className="card">
         <h1>Admin Dashboard</h1>
         <p>Total recent check-ins: <strong>{rows.length}</strong></p>
-        <p>Today's check-ins: <strong>{todayCount}</strong></p>
+        <p>Today&apos;s check-ins: <strong>{todayCount}</strong></p>
       </section>
 
       {meId && <QRCodeCard payload={meId} />}
