@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { supabase } from '@/lib/supabase'
+import { getSupabaseClient } from '@/lib/supabase'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -15,6 +15,13 @@ export default function LoginPage() {
     e.preventDefault()
     setLoading(true)
     setError('')
+
+    const supabase = getSupabaseClient()
+    if (!supabase) {
+      setError('Supabase not configured')
+      setLoading(false)
+      return
+    }
 
     const { error: signInError } = await supabase.auth.signInWithPassword({ email, password })
     setLoading(false)
