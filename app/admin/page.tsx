@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import { supabase } from '@/lib/supabase'
+import { getSupabaseClient } from '@/lib/supabase'
 import QRCodeCard from '@/components/QRCodeCard'
 
 type AttendanceRow = {
@@ -15,6 +15,9 @@ export default function AdminPage() {
   const [meId, setMeId] = useState('')
 
   useEffect(() => {
+    const supabase = getSupabaseClient()
+    if (!supabase) return
+
     supabase.auth.getUser().then(({ data }) => {
       if (data.user?.id) setMeId(data.user.id)
     })
