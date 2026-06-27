@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { demoMode, setDemoUser } from '@/lib/demo'
-import { supabase } from '@/lib/supabase'
+import { getSupabaseClient } from '@/lib/supabase'
 
 export default function SignUpPage() {
   const [fullName, setFullName] = useState('')
@@ -24,6 +24,13 @@ export default function SignUpPage() {
       setDemoUser(email)
       setLoading(false)
       router.push('/admin')
+      return
+    }
+
+    const supabase = getSupabaseClient()
+    if (!supabase) {
+      setError('Supabase not configured')
+      setLoading(false)
       return
     }
 
