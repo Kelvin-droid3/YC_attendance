@@ -44,3 +44,8 @@ create table attendance_records (
 - `/login` auth page
 - `/check-in` scanner/check-in endpoint UI
 - `/admin` admin dashboard + QR generator for current user
+
+
+---
+
+Re-deploy trigger: CI redeploy requested by @Kelvin-droid3
