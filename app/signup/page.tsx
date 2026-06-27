@@ -21,7 +21,7 @@ export default function SignUpPage() {
     setError('')
 
     if (demoMode) {
-      setDemoUser(email, fullName, dateOfBirth)
+      setDemoUser(email)
       setLoading(false)
       router.push('/admin')
       return
