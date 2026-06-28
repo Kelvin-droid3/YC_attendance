@@ -1,13 +1,13 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import { getSupabaseClient } from '@/lib/supabase'
+import { supabase } from '@/lib/supabase'
 import QRCodeCard from '@/components/QRCodeCard'
 
 type AttendanceRow = {
   id: string
-  checked_in_at: string | null
-  attendees: { email: string; full_name: string }[] | null
+  checked_in_at: string
+  attendees: { email: string; full_name: string }
 }
 
 export default function AdminPage() {
@@ -15,9 +15,6 @@ export default function AdminPage() {
   const [meId, setMeId] = useState('')
 
   useEffect(() => {
-    const supabase = getSupabaseClient()
-    if (!supabase) return
-
     supabase.auth.getUser().then(({ data }) => {
       if (data.user?.id) setMeId(data.user.id)
     })
@@ -28,21 +25,11 @@ export default function AdminPage() {
       .order('checked_in_at', { ascending: false })
       .limit(50)
       .then(({ data }) => {
-        // normalize possible null and ensure attendees is an array or null
-        const normalized = (data ?? []).map((r: AttendanceRow) => ({
-          id: r.id,
-          checked_in_at: r.checked_in_at ?? null,
-          attendees: Array.isArray(r.attendees) ? r.attendees : r.attendees ? [r.attendees] : null,
-        })) as AttendanceRow[]
-
-        setRows(normalized)
+        setRows((data as AttendanceRow[]) ?? [])
       })
   }, [])
 
-  const todayCount = useMemo(
-    () => rows.filter((r) => r.checked_in_at && new Date(r.checked_in_at).toDateString() === new Date().toDateString()).length,
-    [rows]
-  )
+  const todayCount = useMemo(() => rows.filter((r) => new Date(r.checked_in_at).toDateString() === new Date().toDateString()).length, [rows])
 
   return (
     <main className="grid">
@@ -66,16 +53,13 @@ export default function AdminPage() {
               </tr>
             </thead>
             <tbody>
-              {rows.map((row) => {
-                const attendee = row.attendees?.[0] ?? null
-                return (
-                  <tr key={row.id}>
-                    <td>{attendee?.full_name ?? 'Unknown'}</td>
-                    <td>{attendee?.email ?? '-'}</td>
-                    <td>{row.checked_in_at ? new Date(row.checked_in_at).toLocaleString() : '-'}</td>
-                  </tr>
-                )
-              })}
+              {rows.map((row) => (
+                <tr key={row.id}>
+                  <td>{row.attendees?.full_name ?? 'Unknown'}</td>
+                  <td>{row.attendees?.email ?? '-'}</td>
+                  <td>{new Date(row.checked_in_at).toLocaleString()}</td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>
